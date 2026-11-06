@@ -1,4 +1,34 @@
 (() => {
+  const desktopView = window.matchMedia('(min-width: 1280px)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const imageReady = image => {
+    if (!image) return Promise.resolve();
+    const decode = () => image.naturalWidth && typeof image.decode === 'function'
+      ? image.decode().catch(() => {}) : Promise.resolve();
+    if (image.complete) return decode();
+    return new Promise(resolve => {
+      const settle = () => {
+        image.removeEventListener('load', settle);
+        image.removeEventListener('error', settle);
+        resolve(decode());
+      };
+      image.addEventListener('load', settle);
+      image.addEventListener('error', settle);
+      if (image.complete) settle();
+    });
+  };
+  const loader = document.getElementById('initial-loader');
+  if (loader) {
+    const visibleView = desktopView.matches ? '.desktop-view' : '.compact-view';
+    const portrait = document.querySelector(`${visibleView} .hero-visual img[fetchpriority="high"]`);
+    Promise.allSettled([
+      document.fonts?.ready,
+      imageReady(portrait),
+      imageReady(loader.querySelector('img')),
+    ]).then(() => requestAnimationFrame(() => {
+      document.documentElement.classList.remove('tok-loading');
+    }));
+  }
   const setMobileScale = () => {
     const scale = window.innerWidth / 360;
     const viewport = window.visualViewport?.height || window.innerHeight;
@@ -33,23 +63,15 @@
   document.fonts.ready.then(fitHero);
   window.addEventListener('resize', fitHero);
   window.visualViewport?.addEventListener('resize', fitHero);
-  document.querySelectorAll('.hero-visual .f45 img, .hero-visual .f217 img').forEach(img => {
-    const loaded = () => {
-      img.classList.remove('image-failed');
-      img.closest('.f45, .f217').style.backgroundImage = 'none';
+  // Reuse the small portrait if a high-resolution candidate fails.
+  document.querySelectorAll('.hero-visual img[fetchpriority="high"]').forEach(img => {
+    const recover = () => {
+      if (!img.hasAttribute('srcset')) return;
+      img.removeAttribute('srcset');
+      img.src = 'assets/19a97-320.png?v=f3d59b743952';
     };
-    img.addEventListener('load', loaded);
-    const failed = () => {
-      img.classList.add('image-failed');
-      // A new responsive candidate can fail after a smaller one has loaded.
-      // Restore the embedded portrait in that case as well.
-      img.closest('.f45, .f217').style.backgroundImage = '';
-    };
-    img.addEventListener('error', failed);
-    if (img.complete) {
-      if (img.naturalWidth) loaded();
-      else failed();
-    }
+    img.addEventListener('error', recover);
+    if (img.complete && !img.naturalWidth) recover();
   });
   if (typeof ResizeObserver === 'function') {
     const observer = new ResizeObserver(entries => entries.forEach(entry => resize(entry.target)));
@@ -57,29 +79,64 @@
   } else {
     window.addEventListener('resize', () => scenes.forEach(resize));
   }
-  document.querySelectorAll('.faq-list').forEach(list => {
-    list.querySelectorAll('.faq-item').forEach(item => {
-      item.addEventListener('toggle', () => {
-        if (!item.open) return;
-        list.querySelectorAll('.faq-item[open]').forEach(other => {
-          if (other !== item) other.open = false;
-        });
-      });
+  const faqTransitions = new WeakMap();
+  const faqTarget = item => faqTransitions.get(item)?.open ?? item.open;
+  const setFaq = (item, open) => {
+    const previous = faqTransitions.get(item);
+    if (!previous && item.open === open) return;
+    // offsetHeight is in CSS pixels, unlike the zoomed mobile client rect.
+    const from = item.offsetHeight;
+    previous?.animation.cancel();
+    faqTransitions.delete(item);
+    item.open = open;
+    const to = item.offsetHeight;
+    const summary = item.querySelector('summary');
+    if (reducedMotion.matches || typeof item.animate !== 'function' || from === to) {
+      item.classList.remove('is-faq-animating');
+      delete item.dataset.faqExpanded;
+      summary?.removeAttribute('aria-expanded');
+      return;
+    }
+    // Keep the answer in layout until the closing animation finishes.
+    item.open = true;
+    item.classList.add('is-faq-animating');
+    item.dataset.faqExpanded = String(open);
+    summary?.setAttribute('aria-expanded', String(open));
+    const animation = item.animate([{height: `${from}px`}, {height: `${to}px`}], {
+      duration: 650, easing: 'cubic-bezier(.25,.7,.2,1)', fill: 'both',
     });
+    faqTransitions.set(item, {animation, open});
+    animation.onfinish = () => {
+      if (faqTransitions.get(item)?.animation !== animation) return;
+      faqTransitions.delete(item);
+      item.open = open;
+      item.classList.remove('is-faq-animating');
+      delete item.dataset.faqExpanded;
+      summary?.removeAttribute('aria-expanded');
+      animation.cancel();
+    };
+  };
+  document.querySelectorAll('.faq-list').forEach(list => {
+    const items = [...list.querySelectorAll('.faq-item')];
+    items.forEach(item => item.querySelector('summary')?.addEventListener('click', event => {
+      event.preventDefault();
+      const open = !faqTarget(item);
+      if (open) items.forEach(other => {
+        if (other !== item && faqTarget(other)) setFaq(other, false);
+      });
+      setFaq(item, open);
+    }));
   });
   const toggle = document.querySelector('.menu-toggle');
   const menu = document.querySelector('#mobile-menu');
-  const closeMenu = () => {
+  const setMenu = open => {
     if (!menu || !toggle) return;
-    menu.hidden = true;
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-label', 'Открыть меню');
+    menu.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
   };
-  toggle?.addEventListener('click', () => {
-    menu.hidden = !menu.hidden;
-    toggle.setAttribute('aria-expanded', String(!menu.hidden));
-    toggle.setAttribute('aria-label', menu.hidden ? 'Открыть меню' : 'Закрыть меню');
-  });
+  const closeMenu = () => setMenu(false);
+  toggle?.addEventListener('click', () => setMenu(Boolean(menu?.hidden)));
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && menu && !menu.hidden) {
       closeMenu();toggle.focus();
@@ -93,10 +150,98 @@
       closeMenu();
     } else if (menu && !menu.hidden && !event.target.closest('.site-header')) closeMenu();
   });
-  window.addEventListener('resize', closeMenu);
-  // Every image has a real URL in HTML. Native lazy loading still works without
-  // JavaScript; this observer additionally wakes whole layered illustrations
-  // before scrolling to them, including Safari's transformed image layers.
+  desktopView.addEventListener('change', closeMenu);
+
+  const initRegistration = () => {
+    const dialog = document.getElementById('video-registration-dialog');
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+    const mount = dialog.querySelector('[data-getcourse-mount]');
+    const status = dialog.querySelector('[data-getcourse-status]');
+    const retry = dialog.querySelector('[data-getcourse-retry]');
+    const close = dialog.querySelector('[data-getcourse-close]');
+    if (!mount || !status || !retry || !close) return;
+    const widgetId = '7b4a913845cc71a0e32ab1f46b5f57545ca0fd54';
+    let widgetState = 'idle';
+    let opener;
+    const loadWidget = () => {
+      if (widgetState === 'loading' || widgetState === 'ready') return;
+      widgetState = 'loading';
+      status.textContent = 'Загружаем форму…';
+      status.hidden = false;
+      retry.hidden = true;
+      const script = document.createElement('script');
+      script.id = widgetId;
+      script.src = 'https://opgc-tok.ru/pl/lite/widget/script?id=1679794';
+      const fail = () => {
+        script.remove();
+        widgetState = 'error';
+        status.textContent = 'Не удалось загрузить форму.';
+        retry.hidden = false;
+      };
+      script.addEventListener('error', fail, {once: true});
+      script.addEventListener('load', () => {
+        // The vendor removes its script after inserting the iframe. If its
+        // DOMContentLoaded handler already ran, do not start it a second time.
+        if (document.getElementById(widgetId) === script) {
+          document.dispatchEvent(new Event(`StartWidget${widgetId}`));
+        }
+        const frame = mount.querySelector('iframe');
+        if (!frame) { fail(); return; }
+        frame.title = 'Регистрация на видео «Системный отдел продаж»';
+        widgetState = 'ready';
+        status.hidden = true;
+      }, {once: true});
+      mount.append(script);
+    };
+    document.querySelectorAll('[data-getcourse-open]').forEach(trigger => {
+      trigger.addEventListener('click', event => {
+        event.preventDefault();
+        if (dialog.open) return;
+        closeMenu();
+        opener = trigger;
+        dialog.showModal();
+        document.documentElement.classList.add('is-video-dialog-open');
+        close.focus({preventScroll: true});
+        loadWidget();
+      });
+    });
+    close.addEventListener('click', () => dialog.close());
+    retry.addEventListener('click', loadWidget);
+    let backdropPointer = false;
+    dialog.addEventListener('pointerdown', event => { backdropPointer = event.target === dialog; });
+    dialog.addEventListener('click', event => {
+      if (backdropPointer && event.target === dialog) dialog.close();
+      backdropPointer = false;
+    });
+    dialog.addEventListener('close', () => {
+      document.documentElement.classList.remove('is-video-dialog-open');
+      opener?.focus({preventScroll: true});
+    });
+  };
+  if (document.readyState === 'complete') initRegistration();
+  else document.addEventListener('DOMContentLoaded', initRegistration, {once: true});
+  // Fetch heavy illustrations near the viewport to reserve bandwidth for the hero.
+  const deferredArt = document.querySelectorAll('img[data-src]');
+  const revealArt = img => {
+    if (img.dataset.srcset) img.srcset = img.dataset.srcset;
+    img.loading = 'eager';
+    img.src = img.dataset.src;
+    delete img.dataset.src;
+    delete img.dataset.srcset;
+  };
+  if (typeof IntersectionObserver === 'function') {
+    const artObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting || entry.boundingClientRect.width === 0) return;
+        artObserver.unobserve(entry.target);
+        revealArt(entry.target);
+      });
+    }, {rootMargin: '160px 0px'});
+    deferredArt.forEach(img => artObserver.observe(img));
+  } else {
+    deferredArt.forEach(revealArt);
+  }
+  // Keep native lazy loading for the remaining small assets. Native lazy loading still works without
   const loadImages = block => {
     block.querySelectorAll('[data-assets-pending]').forEach(scene => scene.removeAttribute('data-assets-pending'));
     block.querySelectorAll('img[loading="lazy"]').forEach(img => { img.loading = 'eager'; });
