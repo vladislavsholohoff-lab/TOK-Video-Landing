@@ -1,6 +1,18 @@
 (() => {
   const desktopView = window.matchMedia('(min-width: 1280px)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const loader = document.getElementById('initial-loader');
+  if (loader) {
+    const root = document.documentElement;
+    const layout = desktopView.matches ? '.desktop-view' : '.compact-view';
+    const portrait = document.querySelector(`${layout} .hero-visual img[fetchpriority="high"]`);
+    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const minimum = new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 700)));
+    const ready = Promise.allSettled([portrait?.decode(), document.fonts?.ready]);
+    Promise.all([minimum, Promise.race([ready, pause(2200)])]).then(() => {
+      root.classList.remove('tok-loading');
+    });
+  }
   const setMobileScale = () => {
     const scale = window.innerWidth / 360;
     const viewport = window.visualViewport?.height || window.innerHeight;
