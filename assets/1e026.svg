@@ -1,0 +1,7 @@
+<svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="75" cy="75" r="29" stroke="#FF3D00" stroke-width="2"/>
+<circle opacity="0.6" cx="75" cy="75" r="44" stroke="#FF3D00" stroke-width="2"/>
+<circle opacity="0.4" cx="75" cy="75" r="59" stroke="#FF3D00" stroke-width="2"/>
+<circle opacity="0.2" cx="75" cy="75" r="74" stroke="#FF3D00" stroke-width="2"/>
+<path d="M85.5 72.4019C87.5 73.5566 87.5 76.4434 85.5 77.5981L72 85.3923C70 86.547 67.5 85.1036 67.5 82.7942L67.5 67.2058C67.5 64.8964 70 63.453 72 64.6077L85.5 72.4019Z" fill="#FF3D00"/>
+</svg>
