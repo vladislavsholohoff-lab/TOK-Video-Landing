@@ -369,6 +369,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
    widths, fonts and spacing. Manual line breaks remain exactly as designed. */
 @media(max-width:699px){
  .compact-view{width:360px;zoom:var(--mobile-scale,1)}
+ /* Match the authored artwork heights before the mobile layout is zoomed. */
+ .compact-view :is(.pains,.results) .feature-inner{min-height:400px}
+ .compact-view :is(.pains,.results) .feature-copy{min-height:0}
+ .compact-view .audience-main{min-height:500px}
  .compact-view .cta-panel{padding:20px}
  .compact-view .hero-copy>h1,.compact-view .hero-copy>h1 span{font-size:24px}
  .compact-view .hero-copy>div:first-child{gap:7.13px}

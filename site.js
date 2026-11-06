@@ -222,7 +222,10 @@
   else document.addEventListener('DOMContentLoaded', initRegistration, {once: true});
   // Fetch heavy illustrations near the viewport to reserve bandwidth for the hero.
   const deferredArt = document.querySelectorAll('img[data-src]');
+  const pendingMobileCardArt = new Set(document.querySelectorAll('.compact-view .card-art img[data-src]'));
   const revealArt = img => {
+    if (!img.dataset.src) return;
+    pendingMobileCardArt.delete(img);
     if (img.dataset.srcset) img.srcset = img.dataset.srcset;
     img.loading = 'eager';
     img.src = img.dataset.src;
@@ -241,7 +244,24 @@
   } else {
     deferredArt.forEach(revealArt);
   }
-  // Keep native lazy loading for the remaining small assets. Native lazy loading still works without
+  // WebKit may clip the observer's prefetch margin inside the zoomed mobile view.
+  // Read viewport coordinates directly for its card art, at most once per frame.
+  let cardArtFrame = 0;
+  const scheduleMobileCardArt = () => {
+    if (cardArtFrame || !pendingMobileCardArt.size || window.innerWidth >= 700) return;
+    cardArtFrame = requestAnimationFrame(() => {
+      cardArtFrame = 0;
+      const margin = 600;
+      for (const img of pendingMobileCardArt) {
+        const {top, bottom, width} = img.getBoundingClientRect();
+        if (width > 0 && top <= window.innerHeight + margin && bottom >= -margin) revealArt(img);
+      }
+    });
+  };
+  scheduleMobileCardArt();
+  window.addEventListener('scroll', scheduleMobileCardArt, {passive: true});
+  window.addEventListener('resize', scheduleMobileCardArt);
+  // Keep native lazy loading for the remaining small assets.
   const loadImages = block => {
     block.querySelectorAll('[data-assets-pending]').forEach(scene => scene.removeAttribute('data-assets-pending'));
     block.querySelectorAll('img[loading="lazy"]').forEach(img => { img.loading = 'eager'; });
