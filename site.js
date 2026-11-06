@@ -1,34 +1,6 @@
 (() => {
   const desktopView = window.matchMedia('(min-width: 1280px)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const imageReady = image => {
-    if (!image) return Promise.resolve();
-    const decode = () => image.naturalWidth && typeof image.decode === 'function'
-      ? image.decode().catch(() => {}) : Promise.resolve();
-    if (image.complete) return decode();
-    return new Promise(resolve => {
-      const settle = () => {
-        image.removeEventListener('load', settle);
-        image.removeEventListener('error', settle);
-        resolve(decode());
-      };
-      image.addEventListener('load', settle);
-      image.addEventListener('error', settle);
-      if (image.complete) settle();
-    });
-  };
-  const loader = document.getElementById('initial-loader');
-  if (loader) {
-    const visibleView = desktopView.matches ? '.desktop-view' : '.compact-view';
-    const portrait = document.querySelector(`${visibleView} .hero-visual img[fetchpriority="high"]`);
-    Promise.allSettled([
-      document.fonts?.ready,
-      imageReady(portrait),
-      imageReady(loader.querySelector('img')),
-    ]).then(() => requestAnimationFrame(() => {
-      document.documentElement.classList.remove('tok-loading');
-    }));
-  }
   const setMobileScale = () => {
     const scale = window.innerWidth / 360;
     const viewport = window.visualViewport?.height || window.innerHeight;
@@ -222,45 +194,59 @@
   else document.addEventListener('DOMContentLoaded', initRegistration, {once: true});
   // Fetch heavy illustrations near the viewport to reserve bandwidth for the hero.
   const deferredArt = document.querySelectorAll('img[data-src]');
-  const pendingMobileCardArt = new Set(document.querySelectorAll('.compact-view .card-art img[data-src]'));
+  const pendingMobileArt = new Set(document.querySelectorAll('.compact-view img[data-src]'));
   const revealArt = img => {
     if (!img.dataset.src) return;
-    pendingMobileCardArt.delete(img);
+    pendingMobileArt.delete(img);
     if (img.dataset.srcset) img.srcset = img.dataset.srcset;
     img.loading = 'eager';
     img.src = img.dataset.src;
     delete img.dataset.src;
     delete img.dataset.srcset;
   };
-  if (typeof IntersectionObserver === 'function') {
-    const artObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting || entry.boundingClientRect.width === 0) return;
-        artObserver.unobserve(entry.target);
-        revealArt(entry.target);
-      });
-    }, {rootMargin: '160px 0px'});
-    deferredArt.forEach(img => artObserver.observe(img));
-  } else {
-    deferredArt.forEach(revealArt);
-  }
   // WebKit may clip the observer's prefetch margin inside the zoomed mobile view.
-  // Read viewport coordinates directly for its card art, at most once per frame.
-  let cardArtFrame = 0;
-  const scheduleMobileCardArt = () => {
-    if (cardArtFrame || !pendingMobileCardArt.size || window.innerWidth >= 700) return;
-    cardArtFrame = requestAnimationFrame(() => {
-      cardArtFrame = 0;
+  // Read viewport coordinates directly for its artwork, at most once per frame.
+  let mobileArtFrame = 0;
+  const scheduleMobileArt = () => {
+    if (mobileArtFrame || !pendingMobileArt.size || window.innerWidth >= 700) return;
+    mobileArtFrame = requestAnimationFrame(() => {
+      mobileArtFrame = 0;
       const margin = 600;
-      for (const img of pendingMobileCardArt) {
+      for (const img of pendingMobileArt) {
         const {top, bottom, width} = img.getBoundingClientRect();
         if (width > 0 && top <= window.innerHeight + margin && bottom >= -margin) revealArt(img);
       }
     });
   };
-  scheduleMobileCardArt();
-  window.addEventListener('scroll', scheduleMobileCardArt, {passive: true});
-  window.addEventListener('resize', scheduleMobileCardArt);
+  let watchingArt = false;
+  const watchArt = () => {
+    if (watchingArt) return;
+    watchingArt = true;
+    if (typeof IntersectionObserver !== 'function') {
+      deferredArt.forEach(revealArt);
+      return;
+    }
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting || entry.boundingClientRect.width === 0) return;
+        observer.unobserve(entry.target);
+        revealArt(entry.target);
+      });
+    }, {rootMargin: '160px 0px'});
+    deferredArt.forEach(img => observer.observe(img));
+    scheduleMobileArt();
+    window.addEventListener('scroll', scheduleMobileArt, {passive: true});
+    window.addEventListener('resize', scheduleMobileArt);
+  };
+  // Give the portrait the connection until the visitor starts scrolling.
+  const view = desktopView.matches ? '.desktop-view' : '.compact-view';
+  const portrait = document.querySelector(`${view} .hero-visual img[fetchpriority="high"]`);
+  if (!portrait || portrait.complete || window.scrollY > 0) watchArt();
+  else {
+    portrait.addEventListener('load', watchArt, {once: true});
+    portrait.addEventListener('error', watchArt, {once: true});
+    window.addEventListener('scroll', watchArt, {passive: true, once: true});
+  }
   // Keep native lazy loading for the remaining small assets.
   const loadImages = block => {
     block.querySelectorAll('[data-assets-pending]').forEach(scene => scene.removeAttribute('data-assets-pending'));
