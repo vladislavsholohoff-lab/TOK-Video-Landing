@@ -328,8 +328,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  .feature-inner{padding:clamp(20px,var(--card-inset),36px)}
  .feature-copy{min-height:calc(121.9512cqw - 2 * clamp(20px,var(--card-inset),36px))}
  .founders-heading>p{margin-top:20px}
- .curriculum-title{min-height:62px}
- .curriculum-row:nth-child(4) .curriculum-title{min-height:38px}
  .faq-summary{gap:20px}
 }
 @media(min-width:1280px){.founders-heading>p{margin-top:5px;padding-top:0}}
@@ -410,3 +408,32 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* The source portrait already contains alpha. Loading it again as a CSS mask
    is redundant and can hide a successfully decoded image when that fetch fails. */
 .f44,.f216{mask-image:none!important;-webkit-mask-image:none!important}
+
+/* Figma's third topic uses a 10px title-to-description gap on phones. */
+@media(max-width:699px){
+ .compact-view .curriculum-row:nth-child(3){row-gap:10px}
+}
+@media(min-width:1280px){
+ .desktop-view .curriculum-row:nth-child(3) :is(.curriculum-title,.curriculum-description){padding-top:7px}
+}
+
+/* Mobile rewards from Figma frame 569:958. */
+.gift-phone-art,.gift-phone-break,.gift-phone-copy{display:none}
+@media(max-width:699px){
+ #gifts-mobile .section-heading>h2{line-height:26px}
+ #gifts-mobile .gifts-grid{margin-top:30px;gap:15px}
+ #gifts-mobile .feature-card{background:radial-gradient(ellipse 100% 234.2520% at right bottom,#f0f0f000 40%,#f0f0f0 100%),#fff}
+ #gifts-mobile .feature-inner{height:400px;padding:20px}
+ #gifts-mobile :is([data-gift="sales-role"],[data-gift="bonus"]) .feature-inner{padding:30px}
+ #gifts-mobile .feature-copy{height:auto}
+ #gifts-mobile .feature-title h3{line-height:34px}
+ #gifts-mobile .feature-body{margin-top:15px}
+ #gifts-mobile .feature-body>div{line-height:22px}
+ #gifts-mobile .gift-illustration,#gifts-mobile .gift-tablet-copy{display:none}
+ #gifts-mobile .gift-phone-break,#gifts-mobile .gift-phone-copy{display:initial}
+ #gifts-mobile .gift-phone-art{display:block;position:absolute;z-index:-1;height:auto;transform-origin:top left;pointer-events:none}
+ #gifts-mobile [data-gift="pdf"] .gift-phone-art{left:25.0000px;top:142.5840px;width:264.8591px;transform:rotate(-2.9399deg)}
+ #gifts-mobile [data-gift="article"] .gift-phone-art{left:-31.0000px;top:225.3028px;width:274.6056px;transform:rotate(-30.0000deg)}
+ #gifts-mobile [data-gift="sales-role"] .gift-phone-art{left:30.1328px;top:187.2188px;width:314.0000px;transform:rotate(11.9317deg)}
+ #gifts-mobile [data-gift="bonus"] .gift-phone-art{left:84.3125px;top:182.0000px;width:225.2964px;transform:rotate(15.0000deg)}
+}

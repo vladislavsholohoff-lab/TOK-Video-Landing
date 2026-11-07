@@ -51,8 +51,9 @@
   document.querySelectorAll('.hero-visual img[fetchpriority="high"]').forEach(img => {
     const recover = () => {
       if (!img.hasAttribute('srcset')) return;
+      img.closest('picture')?.querySelector('source')?.removeAttribute('srcset');
       img.removeAttribute('srcset');
-      img.src = 'assets/19a97-320.png?v=f3d59b743952';
+      img.src = desktopView.matches ? 'assets/baked/hero-desktop-320.b18c63b628cf.png' : 'assets/baked/hero-mobile-320.af4e69cfc272.png';
     };
     img.addEventListener('error', recover);
     if (img.complete && !img.naturalWidth) recover();
@@ -113,28 +114,65 @@
   });
   const toggle = document.querySelector('.menu-toggle');
   const menu = document.querySelector('#mobile-menu');
-  const setMenu = open => {
-    if (!menu || !toggle) return;
-    menu.hidden = !open;
+  let menuOpen = false;
+  let menuCloseTimer;
+  const finishMenuClose = () => {
+    if (!menu || menuOpen) return;
+    menu.hidden = true;
+    menu.classList.remove('is-closing');
+  };
+  const setMenu = (open, {restoreFocus = false, immediate = false} = {}) => {
+    if (!menu || !toggle || menuOpen === open) return;
+    menuOpen = open;
+    clearTimeout(menuCloseTimer);
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+    menu.inert = !open;
+    document.documentElement.classList.toggle('is-mobile-menu-open', open);
+    if (open) {
+      const wasHidden = menu.hidden;
+      menu.hidden = false;
+      menu.classList.remove('is-closing');
+      // Establish the initial below-viewport position before transitioning.
+      if (wasHidden) menu.getBoundingClientRect();
+      menu.classList.add('is-open');
+    } else {
+      const fade = !immediate && !reducedMotion.matches;
+      menu.classList.toggle('is-closing', fade);
+      menu.classList.remove('is-open');
+      if (fade) menuCloseTimer = setTimeout(finishMenuClose, 250);
+      else finishMenuClose();
+      if (restoreFocus) toggle.focus({preventScroll: true});
+    }
   };
-  const closeMenu = () => setMenu(false);
-  toggle?.addEventListener('click', () => setMenu(Boolean(menu?.hidden)));
+  const closeMenu = options => setMenu(false, options);
+  toggle?.addEventListener('click', () => setMenu(!menuOpen, {restoreFocus: true}));
+  menu?.querySelector('[data-menu-veil]')?.addEventListener('click', () => closeMenu({restoreFocus: true}));
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && menu && !menu.hidden) {
-      closeMenu();toggle.focus();
+    if (!menuOpen || !menu || !toggle) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeMenu({restoreFocus: true});
+    }
+    if (event.key === 'Tab') {
+      const targets = [toggle, ...menu.querySelectorAll('a[href], button:not([disabled])')];
+      const current = targets.indexOf(document.activeElement);
+      if (current < 0 || (event.shiftKey ? current === 0 : current === targets.length - 1)) {
+        event.preventDefault();
+        targets[event.shiftKey ? targets.length - 1 : 0].focus();
+      }
     }
   });
   document.addEventListener('click', event => {
+    if (!(event.target instanceof Element)) return;
     const link = event.target.closest('a[href^="#"]');
     if (link) {
       link.classList.add('is-pressed');
       setTimeout(() => link.classList.remove('is-pressed'), 700);
       closeMenu();
-    } else if (menu && !menu.hidden && !event.target.closest('.site-header')) closeMenu();
+    }
   });
-  desktopView.addEventListener('change', closeMenu);
+  desktopView.addEventListener('change', () => closeMenu({immediate: true}));
 
   const initRegistration = () => {
     const dialog = document.getElementById('video-registration-dialog');
@@ -182,7 +220,7 @@
         event.preventDefault();
         if (dialog.open) return;
         closeMenu();
-        opener = trigger;
+        opener = menu?.contains(trigger) ? toggle : trigger;
         dialog.showModal();
         document.documentElement.classList.add('is-video-dialog-open');
         close.focus({preventScroll: true});
