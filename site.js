@@ -8,7 +8,8 @@
     const portrait = document.querySelector(`${layout} .hero-visual img[fetchpriority="high"]`);
     const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     const minimum = new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 700)));
-    const ready = Promise.allSettled([portrait?.decode(), document.fonts?.ready]);
+    const criticalFonts = document.fonts?.load('600 24px Inter');
+    const ready = Promise.allSettled([portrait?.decode(), criticalFonts]);
     Promise.all([minimum, Promise.race([ready, pause(2200)])]).then(() => {
       root.classList.remove('tok-loading');
     });

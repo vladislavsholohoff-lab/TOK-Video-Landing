@@ -1,5 +1,5 @@
 @font-face{font-family:Inter;src:url('fonts/inter-variable.woff2?v=0f409d1d652d') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
-@font-face{font-family:'Forgotten November';src:url('fonts/forgotten-november.otf?v=ee8d17b42fa9') format('opentype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Forgotten November';src:url('fonts/forgotten-november.woff2?v=d9894ac58c0d') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 :root{font-family:Inter,Arial,sans-serif;line-height:1.5;color:#121212;background:#fff;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;--orange:#ff3d00;--ink:#121212;--surface:#f0f0f0}
 *,*::before,*::after{box-sizing:border-box}
 body,h1,h2,h3,p,figure{margin:0}
