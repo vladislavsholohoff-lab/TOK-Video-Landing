@@ -328,3 +328,177 @@
   watchImages();
   window.addEventListener('resize', watchImages);
 })();
+
+(() => {
+  // Correct only visible, short words stranded at a prose line ending.
+  const selectors = [
+    '.benefit > p',
+    '.explanation-copy > div',
+    '.curriculum-description',
+    '.feature-body',
+    '.audience-copy > div',
+    '.audience-result > p',
+    '.cta-description',
+    '.founder > div:not(.scene)',
+    '.founder > p',
+    '.faq-answer',
+    '.hero-copy > h1 + div > .design-paragraph:not(:first-child)',
+    '.footer-bottom p',
+  ].join(',');
+  const excluded = [
+    'h1,h2,h3,h4,h5,h6',
+    'button,a,nav,summary,script,style,noscript,form,iframe',
+    '.feature-title,.section-heading,.curriculum-title,.curriculum-number',
+    '.benefit-heading,.faq-summary,.founders-heading',
+    '.audience-copy > div > .design-paragraph:first-child',
+  ].join(',');
+  const originals = new Map();
+  const glyph = (segments, index) => {
+    const segment = segments.find(part => index >= part.start && index < part.end);
+    if (!segment) return null;
+    const range = document.createRange();
+    range.setStart(segment.node, index - segment.start);
+    range.setEnd(segment.node, index - segment.start + 1);
+    const rect = range.getBoundingClientRect();
+    return rect.width && rect.height ? rect : null;
+  };
+  const sameLine = (a, b) => a && b
+    && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > Math.min(a.height, b.height) / 2;
+  const readFlow = nodes => {
+    let text = '';
+    const segments = nodes.map(node => {
+      const start = text.length;
+      text += node.data;
+      return {node, start, end: text.length};
+    });
+    const words = [...text.matchAll(/[\p{L}\p{N}]+(?:[-\u2010-\u2015][\p{L}\p{N}]+)*/gu)];
+    return {text, segments, words};
+  };
+  const metrics = (nodes, owner) => {
+    const rects = [];
+    nodes.forEach(node => {
+      if (!node.data.trim()) return;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      rects.push(...[...range.getClientRects()].filter(rect => rect.width && rect.height));
+    });
+    rects.sort((a, b) => a.top - b.top);
+    const lines = [];
+    rects.forEach(rect => {
+      if (!lines.some(line => sameLine(line, rect))) lines.push(rect);
+    });
+    const bounds = owner.getBoundingClientRect();
+    return {
+      lines: lines.length,
+      height: rects.length ? Math.max(...rects.map(rect => rect.bottom)) - Math.min(...rects.map(rect => rect.top)) : 0,
+      overflow: Math.max(0, ...rects.map(rect => rect.right - bounds.right)),
+    };
+  };
+  const collectFlows = root => {
+    const flows = [];
+    let pending = [];
+    const finish = owner => {
+      if (pending.length) flows.push({nodes: pending, owner});
+      pending = [];
+    };
+    const walk = (node, owner) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        pending.push(node);
+        return;
+      }
+      if (!(node instanceof Element)) return;
+      const style = getComputedStyle(node);
+      if (node.matches(excluded) || style.display === 'none' || style.visibility === 'hidden') {
+        finish(owner);
+        return;
+      }
+      if (node.tagName === 'BR') {
+        finish(owner);
+        return;
+      }
+      const block = node !== root && !style.display.startsWith('inline') && style.display !== 'contents';
+      if (block) finish(owner);
+      const nextOwner = block ? node : owner;
+      node.childNodes.forEach(child => walk(child, nextOwner));
+      if (block) finish(nextOwner);
+    };
+    walk(root, root);
+    finish(root);
+    return flows;
+  };
+  const eligible = (segments, index) => {
+    const segment = segments.find(part => index >= part.start && index < part.end);
+    const size = segment ? parseFloat(getComputedStyle(segment.node.parentElement).fontSize) : 0;
+    return size >= 12 && size <= 18;
+  };
+  const correctFlow = ({nodes, owner}) => {
+    const limit = readFlow(nodes).words.length;
+    for (let pass = 0; pass < limit; pass++) {
+      const flow = readFlow(nodes);
+      let accepted = false;
+      for (let index = 0; index < flow.words.length - 1; index++) {
+        const word = flow.words[index];
+        const next = flow.words[index + 1];
+        if (!/^[А-Яа-яЁё]{1,2}$/u.test(word[0])) continue;
+        const start = word.index + word[0].length;
+        const gap = flow.text.slice(start, next.index);
+        const space = /^[ \t\r\n\f]+(?=[«„“"'([‘]*$)/u.exec(gap);
+        if (!space || !eligible(flow.segments, word.index) || !eligible(flow.segments, next.index)) continue;
+        const endGlyph = glyph(flow.segments, start - 1);
+        const nextGlyph = glyph(flow.segments, next.index);
+        if (!endGlyph || !nextGlyph || sameLine(endGlyph, nextGlyph) || nextGlyph.top <= endGlyph.top) continue;
+        const before = metrics(nodes, owner);
+        const edits = [];
+        const end = start + space[0].length;
+        let separatorWritten = false;
+        flow.segments.forEach(segment => {
+          if (segment.end <= start || segment.start >= end) return;
+          const from = Math.max(start, segment.start) - segment.start;
+          const to = Math.min(end, segment.end) - segment.start;
+          const original = segment.node.data;
+          edits.push({node: segment.node, original});
+          segment.node.data = original.slice(0, from) + (separatorWritten ? '' : '\u00a0') + original.slice(to);
+          separatorWritten = true;
+        });
+        const after = metrics(nodes, owner);
+        const changed = readFlow(nodes);
+        const currentWord = changed.words[index];
+        const currentNext = changed.words[index + 1];
+        const joined = sameLine(
+          glyph(changed.segments, currentWord.index + currentWord[0].length - 1),
+          glyph(changed.segments, currentNext.index),
+        );
+        if (joined && after.lines <= before.lines && after.height <= before.height + 0.5
+          && after.overflow <= before.overflow + 0.5) {
+          edits.forEach(edit => {
+            if (!originals.has(edit.node)) originals.set(edit.node, edit.original);
+          });
+          accepted = true;
+          break;
+        }
+        edits.forEach(edit => { edit.node.data = edit.original; });
+      }
+      if (!accepted) break;
+    }
+  };
+  const update = () => {
+    originals.forEach((text, node) => {
+      if (node.isConnected) node.data = text;
+    });
+    originals.clear();
+    document.querySelectorAll(selectors).forEach(root => {
+      if (!root.getClientRects().length) return;
+      collectFlows(root).forEach(correctFlow);
+    });
+  };
+  let timer;
+  const schedule = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => requestAnimationFrame(update), 100);
+  };
+  document.fonts.ready.then(schedule);
+  window.addEventListener('resize', schedule);
+  document.addEventListener('toggle', event => {
+    if (event.target.matches?.('.faq-item') && event.target.open) schedule();
+  }, true);
+})();

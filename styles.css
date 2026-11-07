@@ -450,3 +450,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     min-height:calc(121.9512cqw - 40px);
   }
 }
+
+/* Smooth dark bullet background from the ROP card, Figma 569:1478 / 569:848. */
+.desktop-view .pains .feature-card,.desktop-view .audience-main{background-color:#272727;background-image:url("data:image/svg+xml;utf8,<svg viewBox='0 0 590 286' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'><rect x='0' y='0' height='100%' width='100%' fill='url(%23grad)' opacity='1'/><defs><radialGradient id='grad' gradientUnits='userSpaceOnUse' cx='0' cy='0' r='10' gradientTransform='matrix(-59 -0.0000015705 0.000001383 -66.996 590 286)'><stop stop-color='rgba(18,18,18,0)' offset='0.4'/><stop stop-color='rgba(18,18,18,1)' offset='1'/></radialGradient></defs></svg>");background-size:100% 100%;background-repeat:no-repeat}
+.compact-view .pains .feature-card,.compact-view .audience-main{background-color:#272727;background-image:url("data:image/svg+xml;utf8,<svg viewBox='0 0 328 500' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'><rect x='0' y='0' height='100%' width='100%' fill='url(%23grad)' opacity='1'/><defs><radialGradient id='grad' gradientUnits='userSpaceOnUse' cx='0' cy='0' r='10' gradientTransform='matrix(-32.8 -0.0000027456 7.6887e-7 -117.13 328 500)'><stop stop-color='rgba(18,18,18,0)' offset='0.4'/><stop stop-color='rgba(18,18,18,1)' offset='1'/></radialGradient></defs></svg>");background-size:100% 100%;background-repeat:no-repeat}
+.pains :is(.f99,.f101,.f287,.f288){display:none}
