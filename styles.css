@@ -1,6 +1,6 @@
 @font-face{font-family:Inter;src:url('fonts/inter-variable.woff2?v=0f409d1d652d') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
 @font-face{font-family:'Forgotten November';src:url('fonts/forgotten-november.otf?v=ee8d17b42fa9') format('opentype');font-weight:400;font-style:normal;font-display:swap}
-:root{font-family:Inter,Arial,sans-serif;line-height:1.5;color:#121212;background:#fff;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;--orange:#ff3d00;--ink:#121212;--surface:#f0f0f0;--bullet-text-inset:36px}
+:root{font-family:Inter,Arial,sans-serif;line-height:1.5;color:#121212;background:#fff;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;--orange:#ff3d00;--ink:#121212;--surface:#f0f0f0}
 *,*::before,*::after{box-sizing:border-box}
 body,h1,h2,h3,p,figure{margin:0}
 body{min-width:280px;overflow-x:clip}
@@ -440,54 +440,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 :is(.pains,.results) .card-art .f98{mask-image:url("assets/85989.svg?v=ba3736b6d257");-webkit-mask-image:url("assets/85989.svg?v=ba3736b6d257");mask-size:100% 100%;-webkit-mask-size:100% 100%;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:0 0;-webkit-mask-position:0 0}
 :is(.pains,.results) .card-art .f286{mask-image:url("assets/d1ad0.svg?v=509c5affc8f1");-webkit-mask-image:url("assets/d1ad0.svg?v=509c5affc8f1");mask-size:100% 100%;-webkit-mask-size:100% 100%;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:0 0;-webkit-mask-position:0 0}
 
-/* Align bullet text to the same top and left inset on every card. */
-:is(.pains,.results) .feature-inner,
-.desktop-view .gifts .feature-inner,
-.audience-result {
-  padding-top:var(--bullet-text-inset);
-  padding-left:var(--bullet-text-inset);
-}
-.audience-main{padding-left:var(--bullet-text-inset)}
-.audience-result{align-items:flex-start}
-@media(min-width:1280px){
-  :is(.pains,.results,.gifts) .feature-copy{
-    min-height:calc(42.6891cqw - var(--bullet-text-inset) - clamp(20px,var(--card-inset),36px));
-  }
-  /* Keep the baked portrait panel at its original height. */
-  .audience-copy{top:calc(var(--bullet-text-inset) - 30px)}
-}
-@media(max-width:1279px){
-  :is(.pains,.results) .feature-copy{
-    min-height:calc(121.9512cqw - var(--bullet-text-inset) - clamp(20px,var(--card-inset),36px));
-  }
-  .audience-main{padding-top:var(--bullet-text-inset)}
-}
-@media(min-width:700px) and (max-width:1279px){
-  /* Move text independently of the centered, in-flow gift illustration. */
-  #gifts-mobile .feature-copy>.feature-title{
-    margin-top:calc(var(--bullet-text-inset) - clamp(20px,var(--card-inset),36px));
-  }
-  #gifts-mobile .feature-copy>:is(.feature-title,.feature-body){
-    margin-left:calc(var(--bullet-text-inset) - clamp(20px,var(--card-inset),36px));
-  }
-}
-/* Keep wrapped text above the full-size portraits on narrow cards. */
-@container (max-width:345px){
-  .compact-view .audience-main{
-    --audience-art-drop:56px;
-    min-height:calc(152.439cqw + var(--audience-art-drop));
-    background:linear-gradient(90deg,#121212,#272727);
-  }
-  .compact-view .audience-main .card-art{
-    top:var(--audience-art-drop);
-    height:auto;
-    mask-image:linear-gradient(transparent,#000 48px);
-    -webkit-mask-image:linear-gradient(transparent,#000 48px);
-  }
-}
+/* Equal text insets on mobile bullet cards. */
 @media(max-width:699px){
+  :is(.pains,.results) .feature-inner,
   #gifts-mobile .feature-card .feature-inner{
-    padding-top:var(--bullet-text-inset);
-    padding-left:var(--bullet-text-inset);
+    padding:20px;
+  }
+  :is(.pains,.results) .feature-copy{
+    min-height:calc(121.9512cqw - 40px);
   }
 }
