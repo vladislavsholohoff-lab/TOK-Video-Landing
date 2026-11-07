@@ -51,9 +51,8 @@
   document.querySelectorAll('.hero-visual img[fetchpriority="high"]').forEach(img => {
     const recover = () => {
       if (!img.hasAttribute('srcset')) return;
-      img.closest('picture')?.querySelector('source')?.removeAttribute('srcset');
       img.removeAttribute('srcset');
-      img.src = desktopView.matches ? 'assets/baked/hero-desktop-320.b18c63b628cf.png' : 'assets/baked/hero-mobile-320.af4e69cfc272.png';
+      img.src = 'assets/19a97-320.png?v=f3d59b743952';
     };
     img.addEventListener('error', recover);
     if (img.complete && !img.naturalWidth) recover();

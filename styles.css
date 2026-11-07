@@ -368,8 +368,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media(max-width:699px){
  .compact-view{width:360px;zoom:var(--mobile-scale,1)}
  /* Match the authored artwork heights before the mobile layout is zoomed. */
- .compact-view :is(.pains,.results) .feature-inner{min-height:400px}
- .compact-view :is(.pains,.results) .feature-copy{min-height:0}
  .compact-view .audience-main{min-height:500px}
  .compact-view .cta-panel{padding:20px}
  .compact-view .hero-copy>h1,.compact-view .hero-copy>h1 span{font-size:24px}
@@ -437,3 +435,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  #gifts-mobile [data-gift="sales-role"] .gift-phone-art{left:30.1328px;top:187.2188px;width:314.0000px;transform:rotate(11.9317deg)}
  #gifts-mobile [data-gift="bonus"] .gift-phone-art{left:84.3125px;top:182.0000px;width:225.2964px;transform:rotate(15.0000deg)}
 }
+
+/* Masks for the restored original feature artwork. */
+:is(.pains,.results) .card-art .f98{mask-image:url("assets/85989.svg?v=ba3736b6d257");-webkit-mask-image:url("assets/85989.svg?v=ba3736b6d257");mask-size:100% 100%;-webkit-mask-size:100% 100%;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:0 0;-webkit-mask-position:0 0}
+:is(.pains,.results) .card-art .f286{mask-image:url("assets/d1ad0.svg?v=509c5affc8f1");-webkit-mask-image:url("assets/d1ad0.svg?v=509c5affc8f1");mask-size:100% 100%;-webkit-mask-size:100% 100%;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:0 0;-webkit-mask-position:0 0}
