@@ -1,0 +1,155 @@
+.tok-footer {
+  padding-block: 100px;
+}
+
+.tok-footer .tok-footer-container {
+  max-width: 1200px;
+}
+
+.tok-footer-grid {
+  display: grid;
+  grid-template-columns: 517px 201px 200px minmax(0, 1fr);
+  align-items: start;
+}
+
+.tok-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.tok-footer-logo {
+  display: block;
+  width: 103.359375px;
+  height: 32px;
+}
+
+.tok-footer-divider {
+  width: 1px;
+  height: 20px;
+  background: rgb(255 255 255 / 30%);
+}
+
+.tok-footer-names {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 14px;
+}
+
+.tok-footer-column {
+  min-width: 0;
+  padding-top: 2px;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.tok-footer-heading {
+  margin-bottom: 20px;
+  color: #626262;
+  font-weight: 500;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+}
+
+.tok-footer-items {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.tok-footer a {
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.tok-footer a:hover {
+  color: #bfbfbf;
+}
+
+.tok-footer a.is-pressed {
+  color: var(--orange);
+}
+
+.tok-footer-contacts a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tok-footer-contacts img {
+  flex: 0 0 16px;
+}
+
+.tok-footer-contacts a:last-child {
+  text-decoration: underline;
+}
+
+.tok-footer-legal {
+  display: flex;
+  gap: 20px;
+  margin-top: 43px;
+  padding-top: 20px;
+  border-top: 1px solid #2a2a2a;
+  color: #626262;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+@media (max-width: 1279px) {
+  .tok-footer {
+    padding-block: 20px 40px;
+  }
+
+  .tok-footer .tok-footer-container {
+    max-width: 560px;
+  }
+
+  .tok-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px 8px;
+  }
+
+  .tok-footer-brand {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    gap: 0;
+    padding-bottom: 4px;
+  }
+
+  .tok-footer-logo {
+    width: 77.51953125px;
+    height: 24px;
+  }
+
+  .tok-footer-names {
+    width: calc((100% - 8px) / 2);
+  }
+
+  .tok-footer-documents {
+    grid-column: 1 / -1;
+  }
+
+  .tok-footer-column {
+    padding-top: 0;
+  }
+
+  .tok-footer-heading {
+    margin-bottom: 15px;
+  }
+
+  .tok-footer-items {
+    gap: 15px;
+  }
+
+  .tok-footer-legal {
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 40px;
+    padding-top: 40px;
+    font-size: 10px;
+    line-height: 14px;
+  }
+}
