@@ -456,3 +456,97 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .desktop-view .pains .feature-card,.desktop-view .audience-main{background-color:#272727;background-image:url("data:image/svg+xml;utf8,<svg viewBox='0 0 590 286' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'><rect x='0' y='0' height='100%' width='100%' fill='url(%23grad)' opacity='1'/><defs><radialGradient id='grad' gradientUnits='userSpaceOnUse' cx='0' cy='0' r='10' gradientTransform='matrix(-59 -0.0000015705 0.000001383 -66.996 590 286)'><stop stop-color='rgba(18,18,18,0)' offset='0.4'/><stop stop-color='rgba(18,18,18,1)' offset='1'/></radialGradient></defs></svg>");background-size:100% 100%;background-repeat:no-repeat}
 .compact-view .pains .feature-card,.compact-view .audience-main{background-color:#272727;background-image:url("data:image/svg+xml;utf8,<svg viewBox='0 0 328 500' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'><rect x='0' y='0' height='100%' width='100%' fill='url(%23grad)' opacity='1'/><defs><radialGradient id='grad' gradientUnits='userSpaceOnUse' cx='0' cy='0' r='10' gradientTransform='matrix(-32.8 -0.0000027456 7.6887e-7 -117.13 328 500)'><stop stop-color='rgba(18,18,18,0)' offset='0.4'/><stop stop-color='rgba(18,18,18,1)' offset='1'/></radialGradient></defs></svg>");background-size:100% 100%;background-repeat:no-repeat}
 .pains :is(.f99,.f101,.f287,.f288){display:none}
+
+.desktop-view .hero {
+  padding-top: 30px;
+}
+
+.desktop-view .hero-copy > h1 {
+  min-height: 220px;
+}
+
+.desktop-view .hero-copy > button {
+  margin-top: 30px;
+}
+
+.desktop-view .hero-visual {
+  margin-top: -18px;
+}
+
+.desktop-view .hero-visual .f22,
+.desktop-view .hero-visual .f23,
+.desktop-view .hero-visual .f27,
+.desktop-view .hero-visual .f29 {
+  top: 18px;
+}
+
+.desktop-view .hero-visual .f42 {
+  top: 52px;
+}
+
+.desktop-view .hero-visual .f43 {
+  top: 55px;
+}
+
+.desktop-view .hero-visual .f22,
+.desktop-view .hero-visual .f25 {
+  opacity: 1;
+}
+
+@media (max-width: 699px) {
+  .compact-view .hero--course {
+    padding-bottom: 0;
+  }
+
+  .compact-view .hero--course .hero-layout {
+    height: min(627px, calc(var(--mobile-hero-height, calc(100svh / var(--mobile-scale, 1) - 85px)) + 12px));
+  }
+
+  .compact-view .hero--course .hero-copy > .f208 {
+    flex-wrap: nowrap;
+  }
+
+  .compact-view .hero--course .f209:first-child {
+    width: 169.2609px;
+  }
+
+  .compact-view .hero--course .f209:nth-child(2) {
+    width: 152.2609px;
+  }
+
+  .compact-view .hero--course .hero-copy > h1 {
+    max-width: 328px;
+    font-size: 21.5px;
+    line-height: 24px;
+  }
+
+  .compact-view .hero--course .hero-copy > h1 span {
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  .compact-view .hero--course .hero-copy > h1 + div .f215 {
+    line-height: 25.5px;
+  }
+
+  .compact-view .hero--course .hero-visual {
+    margin-top: 12px;
+  }
+
+  .compact-view .hero--course .hero-visual .f235 {
+    top: 106px;
+  }
+
+  .compact-view .hero--course .hero-visual :is(.f220, .f222) {
+    opacity: 1;
+  }
+
+  .compact-view .hero--course .hero-cta {
+    margin-top: -16px;
+  }
+
+  .compact-view .hero--course .hero-cta button {
+    padding-left: 25px;
+    padding-right: 21px;
+  }
+}
