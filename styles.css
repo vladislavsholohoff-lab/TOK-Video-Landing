@@ -457,40 +457,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .compact-view .pains .feature-card,.compact-view .audience-main{background-color:#272727;background-image:url("data:image/svg+xml;utf8,<svg viewBox='0 0 328 500' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'><rect x='0' y='0' height='100%' width='100%' fill='url(%23grad)' opacity='1'/><defs><radialGradient id='grad' gradientUnits='userSpaceOnUse' cx='0' cy='0' r='10' gradientTransform='matrix(-32.8 -0.0000027456 7.6887e-7 -117.13 328 500)'><stop stop-color='rgba(18,18,18,0)' offset='0.4'/><stop stop-color='rgba(18,18,18,1)' offset='1'/></radialGradient></defs></svg>");background-size:100% 100%;background-repeat:no-repeat}
 .pains :is(.f99,.f101,.f287,.f288){display:none}
 
-.desktop-view .hero {
-  padding-top: 30px;
-}
-
-.desktop-view .hero-copy > h1 {
-  min-height: 220px;
-}
-
-.desktop-view .hero-copy > button {
-  margin-top: 30px;
-}
-
-.desktop-view .hero-visual {
-  margin-top: -18px;
-}
-
-.desktop-view .hero-visual .f22,
-.desktop-view .hero-visual .f23,
-.desktop-view .hero-visual .f27,
-.desktop-view .hero-visual .f29 {
-  top: 18px;
-}
-
-.desktop-view .hero-visual .f42 {
-  top: 52px;
-}
-
-.desktop-view .hero-visual .f43 {
-  top: 55px;
-}
-
 .compact-view .hero--course .hero-visual .f234 {
   background: var(--orange);
   border-radius: 50%;
+}
+
+.compact-view .hero--course .hero-copy > h1 {
+  max-width: 328px;
 }
 
 @media (max-width: 699px) {
@@ -514,32 +487,16 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     width: 152.2609px;
   }
 
-  .compact-view .hero--course .hero-copy > h1 {
-    max-width: 328px;
-    font-size: 21.5px;
-    line-height: 24px;
-  }
-
-  .compact-view .hero--course .hero-copy > h1 span {
-    font-size: inherit;
-    line-height: inherit;
-  }
-
   .compact-view .hero--course .hero-copy > h1 + div .f215 {
     line-height: 25.5px;
   }
 
   .compact-view .hero--course .hero-visual {
-    margin-top: 12px;
+    margin-top: 17.3px;
   }
-
-  .compact-view .hero--course .hero-visual .f235 {
-    top: 106px;
-  }
-
 
   .compact-view .hero--course .hero-cta {
-    margin-top: -16px;
+    margin-top: -29px;
   }
 
   .compact-view .hero--course .hero-cta button {
