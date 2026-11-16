@@ -488,9 +488,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   top: 55px;
 }
 
-.desktop-view .hero-visual .f22,
-.desktop-view .hero-visual .f25 {
-  opacity: 1;
+.compact-view .hero--course .hero-visual .f234 {
+  background: var(--orange);
+  border-radius: 50%;
 }
 
 @media (max-width: 699px) {
@@ -537,9 +537,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     top: 106px;
   }
 
-  .compact-view .hero--course .hero-visual :is(.f220, .f222) {
-    opacity: 1;
-  }
 
   .compact-view .hero--course .hero-cta {
     margin-top: -16px;
